@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Cotizaciones · JNSystems</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & VARIABLES ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --accent: #1a3350;
+  --gold: #b8953a;
+  --ink: #1c1c1c;
+  --ink-light: #555;
+  --rule: #c8b89a;
+  --rule-light: #e2d8cc;
+  --cream: #f7f3ec;
+  --green: #2e7d32;
+  --red: #c62828;
+  --bg: #f0ede8;
+  --card: #ffffff;
+  --border: #ddd8d0;
+  --input-bg: #fafaf8;
+  --sidebar-w: 320px;
+}
+
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ===== LAYOUT ===== */
+#app { display: flex; min-height: 100vh; }
+
+/* ===== SIDEBAR ===== */
+#sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--accent);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar-logo .company { font-family: 'Crimson Pro', serif; font-size: 22px; font-weight: 700; color: white; }
+.sidebar-logo .tagline { font-size: 10px; color: rgba(255,255,255,0.55); letter-spacing: 0.5px; margin-top: 2px; }
+
+.sidebar-nav { padding: 16px 0; flex: 1; }
+.nav-section { padding: 8px 24px 4px; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); font-weight: 700; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 24px; font-size: 13px; color: rgba(255,255,255,0.7);
+  cursor: pointer; border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.nav-item.active { background: rgba(255,255,255,0.1); color: white; border-left-color: var(--gold); }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-item .badge {
+  margin-left: auto; background: var(--gold); color: white;
+  font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+}
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 10px; color: rgba(255,255,255,0.35);
+  line-height: 1.6;
+}
+
+/* ===== MAIN CONTENT ===== */
+#main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-header {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.main-header h1 { font-family: 'Crimson Pro', serif; font-size: 22px; font-weight: 700; color: var(--accent); }
+.main-header .subtitle { font-size: 12px; color: var(--ink-light); margin-top: 1px; }
+
+.header-actions { display: flex; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 4px; font-size: 13px;
+  font-weight: 600; cursor: pointer; border: none;
+  font-family: 'Source Sans 3', sans-serif;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #22415f; }
+.btn-secondary { background: white; color: var(--accent); border: 1.5px solid var(--accent); }
+.btn-secondary:hover { background: #f0f4f8; }
+.btn-gold { background: var(--gold); color: white; }
+.btn-gold:hover { background: #a0802e; }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { background: #a82020; }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-xs { padding: 3px 8px; font-size: 10px; }
+
+/* ===== VIEWS ===== */
+.view { display: none; flex: 1; }
+.view.active { display: block; }
+
+/* ===== FORM VIEW ===== */
+.form-content { padding: 28px 32px; max-width: 900px; }
+
+.form-section {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.form-section-header {
+  background: #f5f3ef;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.form-section-num {
+  width: 22px; height: 22px;
+  background: var(--accent); color: white;
+  border-radius: 50%; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.form-section-title { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-section-body { padding: 20px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.form-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+.full-width { grid-column: 1 / -1; }
+
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; font-weight: 600; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.field input, .field select, .field textarea {
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--input-bg);
+  color: var(--ink);
+  transition: border-color 0.15s;
+  outline: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--accent);
+  background: white;
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field .hint { font-size: 10px; color: #999; }
+
+/* ===== ITEMS SECTION ===== */
+.items-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.items-toolbar-title { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+.items-table-editor { width: 100%; border-collapse: collapse; font-size: 12px; }
+.items-table-editor thead tr { background: var(--accent); }
+.items-table-editor th {
+  padding: 8px 10px; text-align: left;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+  color: white; font-weight: 700;
+}
+.items-table-editor th.right { text-align: right; }
+.items-table-editor th.center { text-align: center; }
+
+.items-table-editor tbody tr { border-bottom: 1px solid #eee; }
+.items-table-editor tbody tr:hover { background: #fafaf8; }
+.items-table-editor td { padding: 5px 6px; vertical-align: middle; }
+
+.items-table-editor .section-row td {
+  background: #e8edf3; color: var(--accent);
+  font-weight: 700; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 6px 10px;
+}
+.items-table-editor .mo-row td { background: #fdfaf5; font-style: italic; }
+
+.items-table-editor input[type="text"],
+.items-table-editor input[type="number"] {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: 'Source Sans 3', sans-serif;
+  background: transparent;
+  width: 100%;
+  outline: none;
+}
+.items-table-editor input:focus {
+  border-color: var(--accent);
+  background: white;
+}
+.items-table-editor input[type="number"] { text-align: right; }
+.items-table-editor .desc-input { min-width: 220px; }
+.items-table-editor .qty-input { width: 55px; }
+.items-table-editor .price-input { width: 110px; }
+.items-table-editor .total-cell { text-align: right; font-weight: 600; white-space: nowrap; padding-right: 10px; color: var(--ink); }
+.items-table-editor .del-btn {
+  width: 22px; height: 22px;
+  background: none; border: none; cursor: pointer;
+  color: #ccc; font-size: 14px; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.items-table-editor .del-btn:hover { background: #fee; color: var(--red); }
+
+.add-row-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* ===== TOTALS EDITOR ===== */
+.totals-editor {
+  margin-top: 16px;
+  background: var(--cream);
+  border: 1.5px solid var(--rule);
+  border-radius: 4px;
+  padding: 16px 20px;
+}
+.totals-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid var(--rule-light); font-size: 13px;
+}
+.totals-row:last-child { border-bottom: none; }
+.totals-row.grand {
+  padding-top: 10px; margin-top: 4px;
+  border-top: 2px solid var(--rule);
+  font-family: 'Crimson Pro', serif; font-size: 18px; font-weight: 700;
+  color: var(--accent);
+}
+.totals-row.grand .total-val { color: var(--gold); }
+.totals-row label { font-size: 11px; color: var(--ink-light); }
+.totals-row .total-val { font-weight: 600; }
+.anticipo-selector { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.anticipo-selector select {
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 2px 6px; font-size: 12px;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+/* ===== TEMPLATE SELECTOR ===== */
+.template-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin-bottom: 16px;
+}
+.template-card {
+  border: 2px solid var(--border); border-radius: 6px;
+  padding: 14px 16px; cursor: pointer;
+  transition: all 0.15s; background: white;
+}
+.template-card:hover { border-color: var(--accent); background: #f0f4f8; }
+.template-card.selected { border-color: var(--accent); background: #eef2f7; }
+.template-card .tc-icon { font-size: 22px; margin-bottom: 6px; }
+.template-card .tc-name { font-size: 13px; font-weight: 700; color: var(--accent); }
+.template-card .tc-desc { font-size: 10px; color: var(--ink-light); margin-top: 2px; }
+
+/* ===== PREVIEW SECTION ===== */
+.preview-banner {
+  background: #fff8e1; border-bottom: 2px solid var(--gold);
+  padding: 10px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: #7a6020;
+}
+.preview-banner strong { color: var(--gold); }
+
+/* ===== PDF PAGE STYLES ===== */
+#preview-wrapper {
+  padding: 32px;
+  background: #ccc;
+}
+
+.pdf-page {
+  width: 816px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.25), 0 1px 6px rgba(0,0,0,0.12);
+  padding: 72px;
+  font-family: 'Source Sans 3', sans-serif;
+  color: var(--ink);
+}
+
+.letterhead {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 18px; border-bottom: 2.5px solid var(--accent);
+  margin-bottom: 24px; gap: 20px;
+}
+.lh-company { font-family: 'Crimson Pro', serif; font-size: 22px; font-weight: 700; color: var(--accent); }
+.lh-tagline { font-size: 10px; color: var(--ink-light); margin-top: 2px; letter-spacing: 0.3px; }
+.lh-contact { font-size: 10px; color: var(--ink-light); margin-top: 10px; line-height: 1.9; }
+.lh-right { text-align: right; }
+.lh-doc-type { font-size: 9.5px; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); font-weight: 700; margin-bottom: 3px; }
+.lh-doc-title { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.lh-meta { font-size: 10px; color: var(--ink-light); margin-top: 6px; line-height: 1.9; }
+
+.info-box {
+  background: var(--cream); border: 1px solid var(--rule-light);
+  padding: 12px 0; margin-bottom: 26px;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+}
+.info-cell { padding: 6px 14px; border-right: 1px solid var(--rule-light); }
+.info-cell:last-child { border-right: none; }
+.info-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--gold); font-weight: 700; display: block; margin-bottom: 2px; }
+.info-value { font-size: 10.5px; font-weight: 600; color: var(--ink); line-height: 1.35; }
+
+.sec-heading {
+  font-family: 'Crimson Pro', serif; font-size: 14px; font-weight: 700;
+  color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px;
+  margin-top: 26px; margin-bottom: 9px; padding-bottom: 5px;
+  border-bottom: 1px solid var(--rule-light);
+  display: flex; align-items: center; gap: 8px;
+}
+.sec-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; background: var(--accent); color: white;
+  font-size: 9px; font-weight: 700; border-radius: 50%; flex-shrink: 0;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.body-text { font-size: 11px; line-height: 1.75; color: #2e2e2e; margin-bottom: 8px; text-align: justify; }
+
+.items-table { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-top: 10px; }
+.items-table thead tr { background: var(--accent); }
+.items-table th {
+  padding: 7px 10px; text-align: left;
+  font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px;
+  color: #fff; font-weight: 700; font-family: 'Source Sans 3', sans-serif;
+}
+.items-table th:nth-child(2), .items-table th:nth-child(3), .items-table th:nth-child(4) { text-align: right; }
+.items-table tbody tr { border-bottom: 1px solid #ede9e0; }
+.items-table tbody tr:nth-child(even) { background: #fafaf8; }
+.items-table td { padding: 6px 10px; color: #2e2e2e; line-height: 1.4; vertical-align: middle; }
+.items-table td:nth-child(2), .items-table td:nth-child(3), .items-table td:nth-child(4) { text-align: right; white-space: nowrap; }
+.items-table .r-section td { background: #e8edf3; color: var(--accent); font-weight: 700; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; padding: 5px 10px; }
+.items-table .r-mo td { font-style: italic; color: var(--ink-light); font-size: 10px; background: #fdfaf5; }
+
+.totals-block { margin-top: 18px; border: 1.5px solid var(--rule); background: var(--cream); }
+.totals-block table { width: 100%; border-collapse: collapse; }
+.totals-block td { padding: 6px 14px; font-size: 11px; color: #333; }
+.totals-block td:last-child { text-align: right; font-weight: 600; }
+.totals-block .t-total td { font-weight: 700; font-size: 14px; color: var(--accent); border-top: 1.5px solid var(--rule); font-family: 'Crimson Pro', serif; padding: 10px 14px; }
+.totals-block .t-total td:last-child { color: var(--gold); }
+.totals-block .t-anticipo td { color: var(--ink-light); font-size: 10.5px; }
+.totals-block .t-entrega td { color: var(--ink-light); font-size: 10.5px; }
+
+.disclaimer { margin-top: 16px; padding: 10px 14px; background: #f2efe8; border-left: 3px solid var(--gold); font-size: 10px; color: var(--ink-light); line-height: 1.7; }
+.disclaimer strong { color: var(--ink); }
+
+.signature-block { margin-top: 30px; padding-top: 18px; border-top: 1.5px solid var(--rule-light); display: flex; justify-content: space-between; align-items: flex-start; gap: 0; }
+.sig-inner { font-size: 10.5px; color: var(--ink-light); line-height: 1.9; flex: 1; }
+.sig-inner:last-child { text-align: right; }
+.sig-name { font-family: 'Crimson Pro', serif; font-size: 15px; font-weight: 700; color: var(--ink); display: block; }
+.sig-title { font-size: 9px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.sig-divider { width: 1px; background: var(--rule-light); align-self: stretch; margin: 0 32px; }
+.page-footer { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--rule-light); display: flex; justify-content: space-between; font-size: 8px; color: #aaa; }
+
+/* ===== PRINT ===== */
+@media print {
+  #sidebar,
+  .main-header,
+  .preview-banner,
+  #view-form,
+  #view-history,
+  #view-interactive,
+  #toast,
+  .header-actions,
+  .nav-item,
+  .nav-section,
+  .sidebar-footer,
+  .sidebar-logo { display: none !important; }
+
+  #view-preview { display: block !important; }
+  #app, #main { display: block !important; }
+
+  body, #app, #main, #view-preview { background: white !important; margin: 0 !important; padding: 0 !important; }
+  #preview-wrapper { padding: 0 !important; background: white !important; margin: 0 !important; }
+
+  .pdf-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  @page { margin: 0.75in; size: letter; }
+}
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--accent); color: white;
+  padding: 10px 18px; border-radius: 6px;
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transform: translateY(60px); opacity: 0;
+  transition: all 0.25s; pointer-events: none; z-index: 999;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+
+/* ===== HISTORY VIEW ===== */
+.history-content { padding: 28px 32px; max-width: 900px; }
+.history-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; font-size: 13px; }
+.history-table th { padding: 10px 16px; background: var(--accent); color: white; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+.history-table td { padding: 10px 16px; border-bottom: 1px solid #eee; }
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: #fafaf8; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--ink-light); }
+.empty-state .es-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state .es-title { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+
+/* ===== LOGO PREVIEW ===== */
+.logo-in-doc {
+  max-height: 52px;
+  max-width: 160px;
+  object-fit: contain;
+}
+
+/* ===== MODE TOGGLE ===== */
+.mode-toggle-wrap {
+  display: flex; align-items: center; gap: 0;
+  border: 1.5px solid var(--accent); border-radius: 6px; overflow: hidden;
+}
+.mode-btn {
+  flex: 1; padding: 10px 18px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; background: white; color: var(--accent);
+  font-family: 'Source Sans 3', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.mode-btn.active { background: var(--accent); color: white; }
+.mode-btn:not(.active):hover { background: #f0f4f8; }
+.mode-divider { width: 1.5px; background: var(--accent); align-self: stretch; }
+
+.mode-hint {
+  margin-top: 10px; padding: 10px 14px;
+  border-radius: 4px; font-size: 12px; line-height: 1.6;
+}
+.mode-hint.standard { background: #eef2f7; color: #1a3350; border-left: 3px solid var(--accent); }
+.mode-hint.interactive { background: #fdf9f2; color: #7a5c10; border-left: 3px solid var(--gold); }
+
+/* ===== INTERACTIVE SECTION ROW ===== */
+.items-table-editor .section-row.interactive td {
+  background: #fdf3dc; color: #7a5c10;
+  border-left: 3px solid var(--gold);
+}
+.section-interactive-badge {
+  display: inline-block; margin-left: 8px;
+  background: var(--gold); color: white;
+  font-size: 9px; font-weight: 700; padding: 1px 7px;
+  border-radius: 10px; letter-spacing: 0.3px; vertical-align: middle;
+}
+.section-normal-badge {
+  display: inline-block; margin-left: 8px;
+  background: var(--accent); color: white;
+  font-size: 9px; font-weight: 700; padding: 1px 7px;
+  border-radius: 10px; letter-spacing: 0.3px; vertical-align: middle;
+}
+.toggle-section-btn {
+  font-size: 10px; padding: 2px 8px; border-radius: 3px; cursor: pointer;
+  border: 1px solid var(--gold); background: white; color: var(--gold);
+  font-family: 'Source Sans 3', sans-serif; white-space: nowrap;
+  transition: all 0.12s;
+}
+.toggle-section-btn:hover { background: var(--gold); color: white; }
+.toggle-section-btn.is-checklist { border-color: var(--gold); background: var(--gold); color: white; }
+.toggle-section-btn.is-checklist:hover { background: #a0802e; }
+
+/* ===== EXPORT INTERACTIVE BANNER ===== */
+.interactive-banner {
+  background: linear-gradient(90deg, #1a3350, #22415f);
+  color: white; padding: 10px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px;
+}
+.interactive-banner strong { color: var(--gold); }
+.interactive-preview-wrap { padding: 32px; background: #bbb; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  #sidebar { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr; }
+  .form-grid-4 { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="company">JNSystems</div>
+      <div class="tagline">Generador de Cotizaciones</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Cotización</div>
+      <div class="nav-item active" onclick="showView('form')" id="nav-form">
+        <span class="icon">📝</span> Nueva Cotización
+      </div>
+      <div class="nav-item" onclick="showView('preview')" id="nav-preview">
+        <span class="icon">👁️</span> Vista Previa / PDF
+      </div>
+      <div class="nav-item" onclick="showView('interactive')" id="nav-interactive">
+        <span class="icon">☑️</span> Exportar Interactiva
+      </div>
+      <div class="nav-section" style="margin-top:12px">Historial</div>
+      <div class="nav-item" onclick="showView('history')" id="nav-history">
+        <span class="icon">📁</span> Cotizaciones guardadas
+        <span class="badge" id="history-count">0</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      JNSystems · Seguridad Electrónica<br>
+      Sebastian Toro · Cristian Lizarazo
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- HEADER -->
+    <div class="main-header">
+      <div>
+        <h1 id="header-title">Nueva Cotización</h1>
+        <div class="subtitle" id="header-subtitle">Complete los datos para generar la cotización</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="resetForm()">🔄 Limpiar</button>
+        <button class="btn btn-primary" onclick="saveQuote()">💾 Guardar</button>
+        <button class="btn btn-gold" onclick="showView('preview')">📄 PDF Estándar</button>
+        <button class="btn btn-secondary" onclick="showView('interactive')" style="border-color:var(--gold);color:var(--gold)">☑️ Exportar Interactiva</button>
+      </div>
+    </div>
+
+    <!-- ===== FORM VIEW ===== -->
+    <div id="view-form" class="view active">
+      <div class="form-content">
+
+        <!-- PLANTILLAS -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-num">★</div>
+            <div class="form-section-title">Inicio rápido — Cargar plantilla</div>
+          </div>
+          <div class="form-section-body">
+            <div class="template-grid">
+              <div class="template-card" onclick="loadTemplate('cctv')">
+                <div class="tc-icon">📷</div>
+                <div class="tc-name">CCTV / Cámaras</div>
+                <div class="tc-desc">DVR, cámaras, cableado, mano de obra</div>
+              </div>
+              <div class="template-card" onclick="loadTemplate('acceso')">
+                <div class="tc-icon">🚪</div>
+                <div class="tc-name">Control de Accesos</div>
+                <div class="tc-desc">Videoportería, chapas, lectores, red</div>
+              </div>
+              <div class="template-card" onclick="loadTemplate('combo')">
+                <div class="tc-icon">🔒</div>
+                <div class="tc-name">CCTV + Accesos</div>
+                <div class="tc-desc">Solución combinada completa</div>
+              </div>
+            </div>
+            <p style="font-size:11px;color:#999;">Las plantillas cargan ítems de ejemplo que puedes editar. También puedes empezar desde cero.</p>
+          </div>
+        </div>
+
+        <!-- DATOS DEL PROYECTO -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-num">1</div>
+            <div class="form-section-title">Datos del proyecto y cliente</div>
+          </div>
+          <div class="form-section-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Nombre del proyecto / Cliente *</label>
+                <input type="text" id="f-proyecto" placeholder="Ej: Edificio Milán, Residencia García…" oninput="updateHeader()">
+              </div>
+              <div class="field">
+                <label>Fecha</label>
+                <input type="date" id="f-fecha">
+              </div>
+              <div class="field">
+                <label>Elaborado por</label>
+                <input type="text" id="f-elaborado" value="S. Toro Velasco &amp; C. Lizarazo">
+              </div>
+              <div class="field">
+                <label>Vigencia cotización (días)</label>
+                <input type="number" id="f-vigencia" value="20" min="1" oninput="recalc()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONDICIONES -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-num">2</div>
+            <div class="form-section-title">Condiciones del negocio</div>
+          </div>
+          <div class="form-section-body">
+            <div class="form-grid-4">
+              <div class="field">
+                <label>Anticipo</label>
+                <select id="f-anticipo" onchange="recalc()">
+                  <option value="50">50%</option>
+                  <option value="60">60%</option>
+                  <option value="65" selected>65%</option>
+                  <option value="70">70%</option>
+                  <option value="80">80%</option>
+                  <option value="100">100%</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Garantía equipos</label>
+                <input type="text" id="f-garantia-eq" value="1 año desde entrega">
+              </div>
+              <div class="field">
+                <label>Garantía instalación</label>
+                <input type="text" id="f-garantia-inst" value="6 meses desde entrega">
+              </div>
+              <div class="field">
+                <label>Tiempo instalación</label>
+                <input type="text" id="f-tiempo-inst" value="15 días hábiles">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESCRIPCIÓN -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-num">3</div>
+            <div class="form-section-title">Descripción del proyecto</div>
+          </div>
+          <div class="form-section-body">
+            <div class="field">
+              <label>Texto de descripción (aparece en el documento)</label>
+              <textarea id="f-descripcion" rows="6" placeholder="Describe el alcance del proyecto, tecnología utilizada, beneficios para el cliente…"></textarea>
+              <div class="hint">Puedes escribir varios párrafos separados por una línea en blanco.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODO -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-num">4</div>
+            <div class="form-section-title">Tipo de cotización</div>
+          </div>
+          <div class="form-section-body">
+            <div class="mode-toggle-wrap">
+              <button class="mode-btn active" id="mode-btn-standard" onclick="setMode('standard')">📄 Estándar (PDF)</button>
+              <div class="mode-divider"></div>
+              <button class="mode-btn" id="mode-btn-interactive" onclick="setMode('interactive')">☑️ Interactiva (para GitHub)</button>
+            </div>
+            <div class="mode-hint standard" id="mode-hint">
+              <strong>Modo estándar:</strong> genera un PDF con tabla de ítems fija. Ideal para proyectos con scope definido. Se imprime desde Vista Previa.
+            </div>
+          </div>
+        </div>
+
+        <!-- ÍTEMS -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-num">5</div>
+            <div class="form-section-title">Ítems de la cotización</div>
+          </div>
+          <div class="form-section-body">
+            <table class="items-table-editor" id="items-editor">
+              <thead>
+                <tr>
+                  <th style="width:42%">Descripción</th>
+                  <th class="center" style="width:8%">Cant.</th>
+                  <th class="right" style="width:15%">Precio unit.</th>
+                  <th class="right" style="width:15%">Total</th>
+                  <th class="center" style="width:5%"></th>
+                </tr>
+              </thead>
+              <tbody id="items-tbody">
+              </tbody>
+            </table>
+            <div class="add-row-btns">
+              <button class="btn btn-secondary btn-sm" onclick="addSection()">+ Sección</button>
+              <button class="btn btn-secondary btn-sm" onclick="addItem()">+ Ítem</button>
+              <button class="btn btn-secondary btn-sm" onclick="addMO()">+ Mano de obra</button>
+            </div>
+
+            <div class="totals-editor">
+              <div class="totals-row grand">
+                <span>Total del proyecto</span>
+                <span class="total-val" id="total-display">$0</span>
+              </div>
+              <div class="totals-row">
+                <span>Anticipo (<span id="anticipo-pct-label">65</span>%)</span>
+                <span class="total-val" id="anticipo-display">$0</span>
+              </div>
+              <div class="totals-row">
+                <span>A la entrega (<span id="entrega-pct-label">35</span>%)</span>
+                <span class="total-val" id="entrega-display">$0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DISCLAIMER -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-num">6</div>
+            <div class="form-section-title">Nota / Aclaración (opcional)</div>
+          </div>
+          <div class="form-section-body">
+            <div class="field">
+              <textarea id="f-disclaimer" rows="2" placeholder="Ej: Los valores para referencias sin metraje definido serán ajustados según uso real…"></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /form-content -->
+    </div><!-- /view-form -->
+
+    <!-- ===== PREVIEW VIEW ===== -->
+    <div id="view-preview" class="view">
+      <div class="preview-banner">
+        <span>👁️ <strong>Vista previa</strong> — Para guardar como PDF usa <strong>Ctrl+P</strong> (o ⌘+P en Mac) → "Guardar como PDF"</span>
+        <button class="btn btn-gold btn-sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      </div>
+      <div id="preview-wrapper">
+        <div class="pdf-page" id="pdf-output">
+          <!-- generated -->
+        </div>
+      </div>
+    </div><!-- /view-preview -->
+
+    <!-- ===== INTERACTIVE VIEW ===== -->
+    <div id="view-interactive" class="view">
+      <div class="interactive-banner">
+        <span>☑️ <strong>Cotización Interactiva</strong> — El cliente puede activar/desactivar conjuntos. Descarga el HTML y súbelo a GitHub.</span>
+        <button class="btn btn-gold btn-sm" onclick="downloadInteractive()">⬇️ Descargar HTML para GitHub</button>
+      </div>
+      <div class="interactive-preview-wrap">
+        <div id="interactive-output" style="max-width:816px;margin:0 auto;background:white;box-shadow:0 4px 40px rgba(0,0,0,0.25);padding:0;">
+        </div>
+      </div>
+    </div><!-- /view-interactive -->
+
+    <!-- ===== HISTORY VIEW ===== -->
+    <div id="view-history" class="view">
+      <div class="history-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div>
+            <h2 style="font-family:'Crimson Pro',serif;font-size:22px;color:var(--accent)">Cotizaciones guardadas</h2>
+            <p style="font-size:12px;color:var(--ink-light);margin-top:2px">Guardadas localmente en este navegador</p>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑️ Borrar todo</button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ===== STATE =====
+let items = []; // { type: 'section'|'item'|'mo', desc, qty, price, checklist? }
+let quoteMode = 'standard'; // 'standard' | 'interactive'
+let quoteHistory = JSON.parse(localStorage.getItem('jns_quotes') || '[]');
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  document.getElementById('f-fecha').value = today.toISOString().split('T')[0];
+  updateHistoryCount();
+});
+
+// ===== MODE =====
+function setMode(mode) {
+  quoteMode = mode;
+  document.getElementById('mode-btn-standard').classList.toggle('active', mode === 'standard');
+  document.getElementById('mode-btn-interactive').classList.toggle('active', mode === 'interactive');
+  const hint = document.getElementById('mode-hint');
+  if (mode === 'standard') {
+    hint.className = 'mode-hint standard';
+    hint.innerHTML = '<strong>Modo estándar:</strong> genera un PDF con tabla de ítems fija. Ideal para proyectos con scope definido. Se imprime desde Vista Previa.';
+  } else {
+    hint.className = 'mode-hint interactive';
+    hint.innerHTML = '<strong>Modo interactivo:</strong> cada sección marcada como "Conjunto" se convierte en una tarjeta con checkbox que el cliente puede activar o desactivar. El total se actualiza en tiempo real. Se exporta como HTML para subir a GitHub.';
+  }
+  renderItems();
+}
+
+// ===== NAVIGATION =====
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'preview') generatePreview();
+  if (name === 'interactive') generateInteractivePreview();
+  if (name === 'history') renderHistory();
+  const titles = { form: 'Nueva Cotización', preview: 'Vista Previa / PDF', interactive: 'Cotización Interactiva', history: 'Cotizaciones Guardadas' };
+  const subs = { form: 'Complete los datos para generar la cotización', preview: 'Revise y exporte como PDF', interactive: 'Previsualiza y descarga el HTML interactivo para GitHub', history: 'Historial de cotizaciones guardadas' };
+  document.getElementById('header-title').textContent = titles[name];
+  document.getElementById('header-subtitle').textContent = subs[name];
+}
+
+// ===== ITEMS =====
+function renderItems() {
+  const tbody = document.getElementById('items-tbody');
+  tbody.innerHTML = '';
+  items.forEach((item, i) => {
+    const tr = document.createElement('tr');
+    if (item.type === 'section') {
+      const isChecklist = item.checklist === true;
+      const interactiveMode = quoteMode === 'interactive';
+      tr.className = 'section-row' + (interactiveMode && isChecklist ? ' interactive' : '');
+      const badge = interactiveMode
+        ? (isChecklist
+            ? '<span class="section-interactive-badge">☑ Conjunto seleccionable</span>'
+            : '<span class="section-normal-badge">▸ Sección fija</span>')
+        : '';
+      const toggleBtn = interactiveMode
+        ? `<button class="toggle-section-btn ${isChecklist ? 'is-checklist' : ''}" onclick="toggleChecklist(${i})">${isChecklist ? '☑ Es conjunto' : '☐ Hacer conjunto'}</button>`
+        : '';
+      tr.innerHTML = `
+        <td colspan="2"><input type="text" class="desc-input" value="${esc(item.desc)}" placeholder="Nombre de sección…" onchange="items[${i}].desc=this.value">${badge}</td>
+        <td style="text-align:right;white-space:nowrap">${toggleBtn}</td>
+        <td style="text-align:right"><button class="del-btn" onclick="removeItem(${i})">✕</button></td>`;
+    } else if (item.type === 'mo') {
+      tr.className = 'mo-row';
+      const tot = (item.qty || 1) * (item.price || 0);
+      tr.innerHTML = `
+        <td><input type="text" class="desc-input" value="${esc(item.desc)}" placeholder="Descripción mano de obra…" onchange="items[${i}].desc=this.value;recalc()"></td>
+        <td><input type="number" class="qty-input" value="${item.qty||1}" min="1" onchange="items[${i}].qty=+this.value;recalc()"></td>
+        <td><input type="number" class="price-input" value="${item.price||0}" min="0" step="100" onchange="items[${i}].price=+this.value;recalc()"></td>
+        <td class="total-cell">${fmt(tot)}</td>
+        <td><button class="del-btn" onclick="removeItem(${i})">✕</button></td>`;
+    } else {
+      const tot = (item.qty || 0) * (item.price || 0);
+      tr.innerHTML = `
+        <td><input type="text" class="desc-input" value="${esc(item.desc)}" placeholder="Descripción del ítem…" onchange="items[${i}].desc=this.value;recalc()"></td>
+        <td><input type="number" class="qty-input" value="${item.qty||1}" min="0" step="1" onchange="items[${i}].qty=+this.value;recalc()"></td>
+        <td><input type="number" class="price-input" value="${item.price||0}" min="0" step="100" onchange="items[${i}].price=+this.value;recalc()"></td>
+        <td class="total-cell">${fmt(tot)}</td>
+        <td><button class="del-btn" onclick="removeItem(${i})">✕</button></td>`;
+    }
+    tbody.appendChild(tr);
+  });
+  recalc();
+}
+
+function toggleChecklist(i) {
+  items[i].checklist = !items[i].checklist;
+  renderItems();
+}
+
+function addSection() { items.push({ type: 'section', desc: 'Nueva Sección' }); renderItems(); }
+function addItem() { items.push({ type: 'item', desc: '', qty: 1, price: 0 }); renderItems(); }
+function addMO() { items.push({ type: 'mo', desc: 'Instalación y configuración', qty: 1, price: 0 }); renderItems(); }
+function removeItem(i) { items.splice(i, 1); renderItems(); }
+
+function recalc() {
+  let total = 0;
+  items.forEach(it => {
+    if (it.type !== 'section') total += (it.qty || 0) * (it.price || 0);
+  });
+  const pct = parseInt(document.getElementById('f-anticipo').value) || 65;
+  const anticipo = Math.round(total * pct / 100);
+  const entrega = total - anticipo;
+  document.getElementById('total-display').textContent = fmt(total);
+  document.getElementById('anticipo-display').textContent = fmt(anticipo);
+  document.getElementById('entrega-display').textContent = fmt(entrega);
+  document.getElementById('anticipo-pct-label').textContent = pct;
+  document.getElementById('entrega-pct-label').textContent = 100 - pct;
+}
+
+// ===== TEMPLATES =====
+const TEMPLATES = {
+  cctv: {
+    desc: `Se presenta propuesta para la instalación de un sistema de videovigilancia CCTV diseñado para brindar cobertura total de las áreas estratégicas de la propiedad. El sistema utilizará cámaras de alta definición con visión nocturna, almacenamiento local mediante DVR y acceso remoto desde dispositivos móviles.\n\nEl alcance incluye instalación del cableado estructurado, configuración del DVR, ajuste de ángulos de cámara, puesta en marcha y capacitación básica al usuario para visualización y gestión del sistema.`,
+    items: [
+      { type: 'section', desc: 'Equipos de Grabación' },
+      { type: 'item', desc: 'DVR 8 canales 4K', qty: 1, price: 380000 },
+      { type: 'item', desc: 'Disco duro 2TB para grabación continua', qty: 1, price: 220000 },
+      { type: 'section', desc: 'Cámaras' },
+      { type: 'item', desc: 'Cámara domo HD 2MP visión nocturna 30m', qty: 4, price: 95000 },
+      { type: 'item', desc: 'Cámara bala exterior HD 2MP', qty: 2, price: 110000 },
+      { type: 'section', desc: 'Conectividad y Alimentación' },
+      { type: 'item', desc: 'Cable UTP CAT6 (metros)', qty: 100, price: 1500 },
+      { type: 'item', desc: 'Fuente de poder 12V 5A para cámaras', qty: 2, price: 65000 },
+      { type: 'item', desc: 'Conector BNC (par)', qty: 10, price: 3500 },
+      { type: 'mo', desc: 'Instalación de cámaras y cableado · Configuración DVR · Pruebas y capacitación', qty: 1, price: 1200000 },
+    ]
+  },
+  acceso: {
+    desc: `Se presenta propuesta para la implementación de un sistema de control de accesos y videoportería inteligente que mejorará significativamente la seguridad y comodidad de ingreso a la propiedad.\n\nEl sistema contempla un videoportero con cámara HD, comunicación bidireccional y control desde aplicación móvil, complementado con lectores de tarjetas y chapas eléctricas para acceso controlado. Se incluye instalación, configuración y capacitación.`,
+    items: [
+      { type: 'section', desc: 'Videoportería' },
+      { type: 'item', desc: 'Videoportero inteligente Akuvox R29C', qty: 1, price: 4420000 },
+      { type: 'item', desc: 'Soporte de empotrar para videoportero', qty: 1, price: 180000 },
+      { type: 'item', desc: 'Licencia Premium por apartamento', qty: 1, price: 60000 },
+      { type: 'section', desc: 'Control de Acceso' },
+      { type: 'item', desc: 'Lector de tarjetas Wiegand', qty: 1, price: 64200 },
+      { type: 'item', desc: 'Tarjeta de acceso', qty: 5, price: 5000 },
+      { type: 'section', desc: 'Chapas y Cierres' },
+      { type: 'item', desc: 'Kit electroimán 280Kg con soportes', qty: 1, price: 220000 },
+      { type: 'item', desc: 'Botón liberador sin contacto', qty: 2, price: 48300 },
+      { type: 'section', desc: 'Alimentación y Red' },
+      { type: 'item', desc: 'Fuente de alimentación con respaldo 2H', qty: 1, price: 210000 },
+      { type: 'item', desc: 'Switch POE 4 puertos', qty: 1, price: 86200 },
+      { type: 'mo', desc: 'Instalación sistema · Cableado · Configuración controladores · Pruebas y capacitación', qty: 1, price: 800000 },
+    ]
+  },
+  combo: {
+    desc: `Se presenta propuesta integral que combina un sistema de videovigilancia CCTV con un sistema de control de accesos, brindando una solución completa de seguridad electrónica para la propiedad.\n\nEl proyecto incluye cámaras de alta definición con grabación continua, videoportero inteligente con control desde aplicación móvil, lectores de acceso y chapas eléctricas. Todo integrado bajo una misma instalación, con cableado estructurado, configuración y puesta en marcha.`,
+    items: [
+      { type: 'section', desc: 'Sistema CCTV' },
+      { type: 'item', desc: 'DVR 4 canales HD', qty: 1, price: 280000 },
+      { type: 'item', desc: 'Disco duro 1TB', qty: 1, price: 160000 },
+      { type: 'item', desc: 'Cámara domo HD 2MP visión nocturna', qty: 3, price: 95000 },
+      { type: 'section', desc: 'Control de Accesos' },
+      { type: 'item', desc: 'Videoportero inteligente Akuvox R29C', qty: 1, price: 4420000 },
+      { type: 'item', desc: 'Lector de tarjetas Wiegand', qty: 1, price: 64200 },
+      { type: 'item', desc: 'Kit electroimán 280Kg con soportes', qty: 1, price: 220000 },
+      { type: 'section', desc: 'Infraestructura Compartida' },
+      { type: 'item', desc: 'Switch POE 8 puertos', qty: 1, price: 145000 },
+      { type: 'item', desc: 'Fuente con respaldo 2H', qty: 1, price: 210000 },
+      { type: 'item', desc: 'Cable UTP CAT6 (metros)', qty: 80, price: 1500 },
+      { type: 'mo', desc: 'Instalación integral CCTV + Accesos · Cableado estructurado · Configuración y pruebas · Capacitación', qty: 1, price: 2000000 },
+    ]
+  }
+};
+
+function loadTemplate(name) {
+  const t = TEMPLATES[name];
+  if (!t) return;
+  document.getElementById('f-descripcion').value = t.desc;
+  items = t.items.map(i => ({...i}));
+  renderItems();
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  toast('✅ Plantilla cargada — edita los ítems y precios');
+}
+
+// ===== PREVIEW GENERATION =====
+function generatePreview() {
+  const proyecto = document.getElementById('f-proyecto').value || 'Sin nombre';
+  const fechaRaw = document.getElementById('f-fecha').value;
+  const elaborado = document.getElementById('f-elaborado').value;
+  const vigencia = parseInt(document.getElementById('f-vigencia').value) || 20;
+  const anticipo = parseInt(document.getElementById('f-anticipo').value) || 65;
+  const garantiaEq = document.getElementById('f-garantia-eq').value;
+  const garantiaInst = document.getElementById('f-garantia-inst').value;
+  const tiempoInst = document.getElementById('f-tiempo-inst').value;
+  const descripcion = document.getElementById('f-descripcion').value;
+  const disclaimer = document.getElementById('f-disclaimer').value;
+
+  // Date formatting
+  let fechaStr = '—';
+  let vigenciaStr = '—';
+  if (fechaRaw) {
+    const d = new Date(fechaRaw + 'T12:00:00');
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    fechaStr = `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+    const vd = new Date(d);
+    vd.setDate(vd.getDate() + vigencia);
+    vigenciaStr = `${vigencia} días (hasta ${vd.getDate().toString().padStart(2,'0')}/${(vd.getMonth()+1).toString().padStart(2,'0')}/${vd.getFullYear()})`;
+  }
+
+  // Totals
+  let total = 0;
+  items.forEach(it => { if (it.type !== 'section') total += (it.qty||0) * (it.price||0); });
+  const antVal = Math.round(total * anticipo / 100);
+  const entVal = total - antVal;
+
+  // Items HTML
+  let itemsHTML = '';
+  items.forEach(it => {
+    if (it.type === 'section') {
+      itemsHTML += `<tr class="r-section"><td colspan="4">${esc(it.desc)}</td></tr>`;
+    } else if (it.type === 'mo') {
+      const tot = (it.qty||1) * (it.price||0);
+      itemsHTML += `<tr class="r-mo"><td><em>${esc(it.desc)}</em></td><td style="text-align:right">${it.qty||1}</td><td style="text-align:right">${fmt(it.price||0)}</td><td style="text-align:right">${fmt(tot)}</td></tr>`;
+    } else {
+      const tot = (it.qty||0) * (it.price||0);
+      itemsHTML += `<tr><td>${esc(it.desc)}</td><td style="text-align:right">${it.qty||0}</td><td style="text-align:right">${fmt(it.price||0)}</td><td style="text-align:right">${fmt(tot)}</td></tr>`;
+    }
+  });
+
+  // Description paragraphs
+  const parrafos = descripcion.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+  const descHTML = parrafos.map(p => `<p class="body-text">${esc(p).replace(/\n/g,'<br>')}</p>`).join('');
+
+  // Disclaimer
+  const disclaimerHTML = disclaimer.trim() ? `<div class="disclaimer"><strong>Aclaración para el cliente:</strong> ${esc(disclaimer)}</div>` : '';
+
+  // Month/year for footer
+  const fechaFooter = fechaRaw ? (() => { const d = new Date(fechaRaw+'T12:00:00'); const m=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']; return m[d.getMonth()]+' '+d.getFullYear(); })() : '';
+
+  const html = `
+    <div class="letterhead">
+      <div>
+        <div class="lh-company">JNSystems</div>
+        <div class="lh-tagline">Seguridad Electrónica &amp; Automatización</div>
+        <div class="lh-contact">300 4060143<br>jnsystemsproject@gmail.com<br>Santiago de Cali, Colombia</div>
+      </div>
+      <div class="lh-right">
+        <div class="lh-doc-type">Documento de Cotización</div>
+        <div class="lh-doc-title">${esc(proyecto)}</div>
+        <div class="lh-meta">Fecha: ${fechaStr}<br>Elaborado por: ${esc(elaborado)}</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-cell"><span class="info-label">Condición de pago</span><span class="info-value">${anticipo}% anticipo · ${100-anticipo}% entrega</span></div>
+      <div class="info-cell"><span class="info-label">Garantía dispositivos</span><span class="info-value">${esc(garantiaEq)}</span></div>
+      <div class="info-cell"><span class="info-label">Garantía instalación</span><span class="info-value">${esc(garantiaInst)}</span></div>
+      <div class="info-cell"><span class="info-label">Tiempo instalación</span><span class="info-value">${esc(tiempoInst)}</span></div>
+      <div class="info-cell"><span class="info-label">Vigencia cotización</span><span class="info-value">${vigenciaStr}</span></div>
+    </div>
+
+    ${descHTML ? `<div class="sec-heading"><span class="sec-num">1</span> Descripción del Proyecto</div>${descHTML}` : ''}
+
+    <div class="sec-heading"><span class="sec-num">${descHTML ? '2' : '1'}</span> Cotización — Equipos e Instalación</div>
+    <table class="items-table">
+      <thead><tr>
+        <th>Descripción</th>
+        <th style="text-align:right">Cant.</th>
+        <th style="text-align:right">Precio unit.</th>
+        <th style="text-align:right">Total</th>
+      </tr></thead>
+      <tbody>${itemsHTML}</tbody>
+    </table>
+
+    <div class="totals-block">
+      <table>
+        <tr class="t-total"><td>Total del proyecto</td><td>${fmt(total)}</td></tr>
+        <tr class="t-anticipo"><td>Anticipo (${anticipo}%)</td><td>${fmt(antVal)}</td></tr>
+        <tr class="t-entrega"><td>A la entrega formal (${100-anticipo}%)</td><td>${fmt(entVal)}</td></tr>
+      </table>
+    </div>
+
+    ${disclaimerHTML}
+
+    <div class="signature-block">
+      <div class="sig-inner">
+        <span class="sig-name">Sebastian Toro Velasco</span>
+        <span class="sig-title">JNSystems · Seguridad &amp; Automatización</span>
+        300 4060143<br>jnsystemsproject@gmail.com
+      </div>
+      <div class="sig-divider"></div>
+      <div class="sig-inner">
+        <span class="sig-name">Cristian Ricardo Lizarazo</span>
+        <span class="sig-title">JNSystems · Seguridad &amp; Automatización</span>
+        300 4060143<br>jnsystemsproject@gmail.com
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>JNSystems · Seguridad Electrónica &amp; Automatización</span>
+      <span>Cotización ${esc(proyecto)} · ${fechaFooter}</span>
+    </div>
+  `;
+
+  document.getElementById('pdf-output').innerHTML = html;
+  showView('preview');
+}
+
+// ===== INTERACTIVE GENERATOR =====
+function buildInteractiveHTML(forDownload = false) {
+  const proyecto = document.getElementById('f-proyecto').value || 'Sin nombre';
+  const fechaRaw = document.getElementById('f-fecha').value;
+  const elaborado = document.getElementById('f-elaborado').value;
+  const vigencia = parseInt(document.getElementById('f-vigencia').value) || 20;
+  const anticipo = parseInt(document.getElementById('f-anticipo').value) || 65;
+  const garantiaEq = document.getElementById('f-garantia-eq').value;
+  const garantiaInst = document.getElementById('f-garantia-inst').value;
+  const tiempoInst = document.getElementById('f-tiempo-inst').value;
+  const descripcion = document.getElementById('f-descripcion').value;
+  const disclaimer = document.getElementById('f-disclaimer').value;
+
+  let fechaStr = '—', vigenciaStr = '—', fechaFooter = '';
+  if (fechaRaw) {
+    const d = new Date(fechaRaw + 'T12:00:00');
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    fechaStr = `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+    const vd = new Date(d); vd.setDate(vd.getDate() + vigencia);
+    vigenciaStr = `${vigencia} días (hasta ${vd.getDate().toString().padStart(2,'0')}/${(vd.getMonth()+1).toString().padStart(2,'0')}/${vd.getFullYear()})`;
+    const m2=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    fechaFooter = m2[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  // Group items into segments: checklist sections get their own card, fixed sections are merged into a fixed block
+  // Build card data
+  const cards = []; // { checklist, name, total, itemsHTML }
+  let currentCard = null;
+  let fixedItems = []; // items before first section or in fixed sections
+
+  function pushFixed() {
+    if (fixedItems.length === 0) return;
+    let tot = 0, rows = '';
+    fixedItems.forEach(it => {
+      if (it.type === 'section') {
+        rows += `<tr class="r-sec"><td colspan="4">${esc(it.desc)}</td></tr>`;
+      } else {
+        const t = (it.qty||0)*(it.price||0); tot += t;
+        const cls = it.type === 'mo' ? ' class="r-mo"' : '';
+        const desc = it.type === 'mo' ? `<em>${esc(it.desc)}</em>` : esc(it.desc);
+        rows += `<tr${cls}><td>${desc}</td><td style="text-align:right">${it.qty||0}</td><td style="text-align:right">${fmt(it.price||0)}</td><td style="text-align:right">${fmt(t)}</td></tr>`;
+      }
+    });
+    cards.push({ checklist: false, name: 'Ítems incluidos', total: tot, itemsHTML: rows });
+    fixedItems = [];
+  }
+
+  items.forEach(it => {
+    if (it.type === 'section') {
+      if (currentCard) { cards.push(currentCard); currentCard = null; }
+      if (!it.checklist) { pushFixed(); fixedItems.push(it); }
+      else {
+        pushFixed();
+        currentCard = { checklist: true, name: it.desc, total: 0, itemsHTML: '' };
+      }
+    } else {
+      if (currentCard) {
+        const t = (it.qty||0)*(it.price||0); currentCard.total += t;
+        const cls = it.type === 'mo' ? ' class="r-mo"' : '';
+        const desc = it.type === 'mo' ? `<em>${esc(it.desc)}</em>` : esc(it.desc);
+        currentCard.itemsHTML += `<tr${cls}><td>${desc}</td><td style="text-align:right">${it.qty||0}</td><td style="text-align:right">${fmt(it.price||0)}</td><td style="text-align:right">${fmt(t)}</td></tr>`;
+      } else {
+        fixedItems.push(it);
+      }
+    }
+  });
+  if (currentCard) cards.push(currentCard);
+  pushFixed();
+
+  // Build cards HTML
+  let cardsHTML = '';
+  cards.forEach((card, ci) => {
+    if (!card.checklist) {
+      // Fixed block — rendered as normal table inside the doc
+      cardsHTML += `
+        <div class="fixed-block">
+          <div class="fixed-block-label">▸ Incluido en el proyecto</div>
+          <table class="items-table">
+            <thead><tr><th>Descripción</th><th style="text-align:right">Cant.</th><th style="text-align:right">Precio unit.</th><th style="text-align:right">Total</th></tr></thead>
+            <tbody>${card.itemsHTML}</tbody>
+          </table>
+        </div>`;
+    } else {
+      const dataTotal = card.total;
+      cardsHTML += `
+        <div class="subsystem-card selected" data-total="${dataTotal}" id="card-${ci}">
+          <div class="card-row">
+            <div class="chk" onclick="toggleCard('card-${ci}')"></div>
+            <div class="card-title-col">
+              <div class="card-sys-name">${esc(card.name)}</div>
+            </div>
+            <div class="card-price">${fmt(dataTotal)}</div>
+            <button class="expand-btn no-print" onclick="toggleDetail(this)">Ver detalle ▾</button>
+          </div>
+          <div class="card-detail">
+            <table class="detail-tbl">
+              <thead><tr><th>Cant.</th><th>Descripción</th><th style="text-align:right">Precio unit.</th><th style="text-align:right">Total</th></tr></thead>
+              <tbody>${card.itemsHTML}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+  });
+
+  const parrafos = descripcion.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+  const descHTML = parrafos.map(p => `<p class="body-text">${esc(p).replace(/\n/g,'<br>')}</p>`).join('');
+  const disclaimerHTML = disclaimer.trim() ? `<div class="disclaimer"><strong>Aclaración para el cliente:</strong> ${esc(disclaimer)}</div>` : '';
+  const secN = descHTML ? 2 : 1;
+
+  const fullHTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotización — ${esc(proyecto)} · JNSystems</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--accent:#1a3350;--gold:#b8953a;--ink:#1c1c1c;--ink-light:#555;--rule:#c8b89a;--rule-light:#e2d8cc;--cream:#f7f3ec;--selected-bg:#fdf9f2;--selected-border:#c8a84a}
+body{background:#d4cfc8;font-family:'Source Sans 3',sans-serif;color:var(--ink);min-height:100vh;padding:32px 16px 120px}
+@media print{body{background:white;padding:0}.pdf-page{box-shadow:none;margin:0;width:100%;max-width:100%}.no-print{display:none!important}.card-detail{display:block!important}@page{margin:.75in;size:letter}}
+.toolbar{max-width:816px;margin:0 auto 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toolbar-label{font-size:12px;color:#888}
+.btn-export{background:var(--accent);color:white;border:none;padding:8px 20px;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:7px;transition:background .15s}
+.btn-export:hover{background:#243d5c}
+.pdf-page{width:816px;max-width:100%;margin:0 auto;background:#fff;box-shadow:0 4px 40px rgba(0,0,0,.25),0 1px 6px rgba(0,0,0,.12);padding:72px}
+.letterhead{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:18px;border-bottom:2.5px solid var(--accent);margin-bottom:24px;gap:20px}
+.lh-company{font-family:'Crimson Pro',serif;font-size:22px;font-weight:700;color:var(--accent)}
+.lh-tagline{font-size:10px;color:var(--ink-light);margin-top:2px;letter-spacing:.3px}
+.lh-contact{font-size:10px;color:var(--ink-light);margin-top:10px;line-height:1.9}
+.lh-right{text-align:right}
+.lh-doc-type{font-size:9.5px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);font-weight:700;margin-bottom:3px}
+.lh-doc-title{font-family:'Crimson Pro',serif;font-size:24px;font-weight:700;color:var(--ink);line-height:1.2}
+.lh-meta{font-size:10px;color:var(--ink-light);margin-top:6px;line-height:1.9}
+.info-box{background:var(--cream);border:1px solid var(--rule-light);padding:12px 0;margin-bottom:26px;display:grid;grid-template-columns:repeat(5,1fr)}
+.info-cell{padding:6px 14px;border-right:1px solid var(--rule-light)}
+.info-cell:last-child{border-right:none}
+.info-label{font-size:8px;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);font-weight:700;display:block;margin-bottom:2px}
+.info-value{font-size:10.5px;font-weight:600;color:var(--ink);line-height:1.35}
+.sec-heading{font-family:'Crimson Pro',serif;font-size:14px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-top:26px;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--rule-light);display:flex;align-items:center;gap:8px}
+.sec-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--accent);color:white;font-size:9px;font-weight:700;border-radius:50%;flex-shrink:0;font-family:'Source Sans 3',sans-serif}
+.body-text{font-size:11px;line-height:1.75;color:#2e2e2e;margin-bottom:8px;text-align:justify}
+.hint-banner{background:linear-gradient(90deg,#1a3350,#2c5282);color:white;padding:10px 14px;margin-bottom:14px;border-radius:2px;display:flex;align-items:center;gap:11px;font-size:10.5px}
+.hint-banner strong{font-size:11.5px;display:block;margin-bottom:1px}
+.hint-banner p{opacity:.82}
+.subsystem-card{border:1px solid var(--rule-light);margin-bottom:5px;border-radius:1px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.subsystem-card.selected{border-color:var(--selected-border);box-shadow:0 1px 6px rgba(184,149,58,.15)}
+.card-row{display:flex;align-items:center;gap:10px;padding:9px 11px;user-select:none;background:#fafaf8;border-bottom:1px solid transparent;transition:background .12s}
+.subsystem-card.selected .card-row{background:var(--selected-bg);border-bottom-color:#edddb0}
+.chk{width:15px;height:15px;border:1.5px solid #d0c8bc;border-radius:3px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:white;transition:all .14s}
+.chk:hover{border-color:var(--gold)}
+.subsystem-card.selected .chk{background:var(--gold);border-color:var(--gold)}
+.chk::after{content:'';width:3.5px;height:6px;border:1.5px solid white;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);opacity:0;transition:opacity .12s}
+.subsystem-card.selected .chk::after{opacity:1}
+.card-title-col{flex:1}
+.card-sys-name{font-size:11px;font-weight:700;color:var(--ink);font-family:'Crimson Pro',serif;line-height:1.3}
+.card-price{font-size:12.5px;font-weight:700;color:var(--accent);font-family:'Crimson Pro',serif;white-space:nowrap;min-width:88px;text-align:right}
+.subsystem-card.selected .card-price{color:var(--gold)}
+.expand-btn{font-size:9.5px;color:var(--ink-light);cursor:pointer;padding:2px 8px;border:1px solid var(--rule-light);border-radius:2px;background:white;transition:all .12s;white-space:nowrap;font-family:'Source Sans 3',sans-serif}
+.expand-btn:hover{background:var(--cream);border-color:var(--gold);color:var(--gold)}
+.card-detail{display:none;border-top:1px solid var(--rule-light)}
+.subsystem-card.open .card-detail{display:block}
+.detail-tbl{width:100%;border-collapse:collapse;font-size:10px}
+.detail-tbl thead tr{background:#f2eee6}
+.detail-tbl th{padding:5px 9px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-light);font-weight:700}
+.detail-tbl td{padding:4.5px 9px;border-bottom:1px solid #f0ede6;color:#333;line-height:1.4;vertical-align:middle}
+.detail-tbl td:last-child{text-align:right;white-space:nowrap}
+.detail-tbl tr:last-child td{border-bottom:none}
+.detail-tbl .r-mo td{font-style:italic;color:var(--ink-light);font-size:9.5px}
+.detail-tbl .r-sec td{background:#e8edf3;color:var(--accent);font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px;padding:4px 9px}
+.fixed-block{margin-bottom:12px}
+.fixed-block-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-light);font-weight:700;margin-bottom:6px}
+.items-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:4px}
+.items-table thead tr{background:var(--accent)}
+.items-table th{padding:7px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:#fff;font-weight:700}
+.items-table td{padding:6px 10px;color:#2e2e2e;line-height:1.4;vertical-align:middle;border-bottom:1px solid #ede9e0}
+.items-table .r-mo td{font-style:italic;color:var(--ink-light);font-size:10px;background:#fdfaf5}
+.items-table .r-sec td{background:#e8edf3;color:var(--accent);font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px;padding:5px 10px}
+.total-summary{border:1.5px solid var(--selected-border);background:var(--selected-bg);padding:13px 14px;margin-top:12px;display:none}
+.total-summary.visible{display:block}
+.total-summary h4{font-family:'Crimson Pro',serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:8px}
+.total-summary table{width:100%;border-collapse:collapse;font-size:10.5px}
+.total-summary td{padding:3px 0;color:#333}
+.total-summary td:last-child{text-align:right;font-weight:600}
+.total-summary .ts-total td{font-weight:700;font-size:13px;color:var(--accent);padding-top:8px;border-top:1.5px solid var(--rule);font-family:'Crimson Pro',serif}
+.total-summary .ts-total td:last-child{color:var(--gold)}
+.disclaimer{margin-top:16px;padding:10px 14px;background:#f2efe8;border-left:3px solid var(--gold);font-size:10px;color:var(--ink-light);line-height:1.7}
+.disclaimer strong{color:var(--ink)}
+.signature-block{margin-top:30px;padding-top:18px;border-top:1.5px solid var(--rule-light);display:flex;justify-content:space-between;align-items:flex-start}
+.sig-inner{font-size:10.5px;color:var(--ink-light);line-height:1.9;flex:1}
+.sig-inner:last-child{text-align:right}
+.sig-name{font-family:'Crimson Pro',serif;font-size:15px;font-weight:700;color:var(--ink);display:block}
+.sig-title{font-size:9px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.sig-divider{width:1px;background:var(--rule-light);align-self:stretch;margin:0 32px}
+.page-footer{margin-top:28px;padding-top:8px;border-top:1px solid var(--rule-light);display:flex;justify-content:space-between;font-size:8px;color:#aaa}
+.total-float{position:fixed;bottom:0;left:0;right:0;background:var(--accent);color:white;padding:10px 24px;display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;box-shadow:0 -3px 20px rgba(0,0,0,.2);z-index:999}
+.tf-label{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:1px}
+.tf-amount{font-family:'Crimson Pro',serif;font-size:26px;font-weight:700;color:white}
+.tf-count{font-size:12px;opacity:.8}
+.tf-btn{background:var(--gold);color:white;border:none;padding:8px 18px;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:4px}
+.tf-btn:hover{background:#a0802e}
+</style>
+</head>
+<body>
+<div class="toolbar no-print">
+  <div class="toolbar-label">Cotización interactiva · <span>Selecciona los conjuntos que deseas incluir</span></div>
+  <button class="btn-export" onclick="window.print()">⬇ Exportar PDF</button>
+</div>
+<div class="pdf-page">
+  <div class="letterhead">
+    <div>
+      <div class="lh-company">JNSystems</div>
+      <div class="lh-tagline">Seguridad Electrónica &amp; Automatización</div>
+      <div class="lh-contact">300 4060143<br>jnsystemsproject@gmail.com<br>Santiago de Cali, Colombia</div>
+    </div>
+    <div class="lh-right">
+      <div class="lh-doc-type">Documento de Cotización</div>
+      <div class="lh-doc-title">${esc(proyecto)}</div>
+      <div class="lh-meta">Fecha: ${fechaStr}<br>Elaborado por: ${esc(elaborado)}</div>
+    </div>
+  </div>
+  <div class="info-box">
+    <div class="info-cell"><span class="info-label">Condición de pago</span><span class="info-value">${anticipo}% anticipo · ${100-anticipo}% entrega</span></div>
+    <div class="info-cell"><span class="info-label">Garantía dispositivos</span><span class="info-value">${esc(garantiaEq)}</span></div>
+    <div class="info-cell"><span class="info-label">Garantía instalación</span><span class="info-value">${esc(garantiaInst)}</span></div>
+    <div class="info-cell"><span class="info-label">Tiempo instalación</span><span class="info-value">${esc(tiempoInst)}</span></div>
+    <div class="info-cell"><span class="info-label">Vigencia cotización</span><span class="info-value">${vigenciaStr}</span></div>
+  </div>
+  ${descHTML ? `<div class="sec-heading"><span class="sec-num">1</span> Descripción del Proyecto</div>${descHTML}` : ''}
+  <div class="sec-heading"><span class="sec-num">${secN}</span> Selecciona los sistemas a incluir</div>
+  <div class="hint-banner no-print">
+    <span>☑</span>
+    <div><strong>Selecciona los conjuntos que deseas contratar</strong><p>Activa o desactiva cada conjunto para ver el total actualizado. Puedes expandir cada uno para ver el detalle de equipos.</p></div>
+  </div>
+  ${cardsHTML}
+  <div class="total-summary" id="summary-box">
+    <h4>Resumen — Sistemas Seleccionados</h4>
+    <table id="summary-tbl"></table>
+  </div>
+  ${disclaimerHTML}
+  <div class="signature-block">
+    <div class="sig-inner">
+      <span class="sig-name">Sebastian Toro Velasco</span>
+      <span class="sig-title">JNSystems · Seguridad &amp; Automatización</span>
+      300 4060143<br>jnsystemsproject@gmail.com
+    </div>
+    <div class="sig-divider"></div>
+    <div class="sig-inner">
+      <span class="sig-name">Cristian Ricardo Lizarazo</span>
+      <span class="sig-title">JNSystems · Seguridad &amp; Automatización</span>
+      300 4060143<br>jnsystemsproject@gmail.com
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>JNSystems · Seguridad Electrónica &amp; Automatización</span>
+    <span>Cotización ${esc(proyecto)} · ${fechaFooter}</span>
+  </div>
+</div>
+<div class="total-float no-print">
+  <div><div class="tf-label">Total seleccionado</div><div class="tf-count" id="sel-count">Cargando…</div></div>
+  <div class="tf-amount" id="grand-total">$0</div>
+  <button class="tf-btn" onclick="window.print()">⬇ Exportar PDF</button>
+</div>
+<script>
+function fmt(n){return'$'+Math.round(n).toLocaleString('es-CO')}
+function toggleCard(id){
+  const card=document.getElementById(id);
+  card.classList.toggle('selected');
+  update();
+}
+function toggleDetail(btn){
+  const card=btn.closest('.subsystem-card');
+  const isOpen=card.classList.toggle('open');
+  btn.textContent=isOpen?'Ocultar ▴':'Ver detalle ▾';
+}
+function update(){
+  let total=0,count=0;const rows=[];
+  document.querySelectorAll('.subsystem-card').forEach(card=>{
+    if(!card.classList.contains('selected'))return;
+    count++;
+    const amount=parseInt(card.dataset.total)||0;
+    total+=amount;
+    rows.push({name:card.querySelector('.card-sys-name').textContent,amount});
+  });
+  document.getElementById('grand-total').textContent=fmt(total);
+  document.getElementById('sel-count').textContent=count===0?'Sin conjuntos seleccionados':count===1?'1 conjunto seleccionado':count+' conjuntos seleccionados';
+  const box=document.getElementById('summary-box');
+  if(rows.length===0){box.classList.remove('visible');return}
+  box.classList.add('visible');
+  const ant=Math.round(total*${anticipo}/100);const ent=total-ant;
+  document.getElementById('summary-tbl').innerHTML=
+    rows.map(r=>'<tr><td>'+r.name+'</td><td>'+fmt(r.amount)+'</td></tr>').join('')+
+    '<tr class="ts-total"><td>TOTAL INVERSIÓN SELECCIONADA</td><td>'+fmt(total)+'</td></tr>'+
+    '<tr style="font-size:9.5px"><td style="padding-top:6px;color:#666">Anticipo (${anticipo}%)</td><td style="padding-top:6px;color:#666;text-align:right">'+fmt(ant)+'</td></tr>'+
+    '<tr style="font-size:9.5px"><td style="color:#666">A entrega (${100-anticipo}%)</td><td style="color:#666;text-align:right">'+fmt(ent)+'</td></tr>';
+}
+update();
+<\/script>
+</body>
+</html>`;
+  return fullHTML;
+}
+
+function generateInteractivePreview() {
+  const html = buildInteractiveHTML(false);
+  const output = document.getElementById('interactive-output');
+  output.innerHTML = '';
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'width:100%;height:900px;border:none;display:block;';
+  output.appendChild(iframe);
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(html);
+  iframe.contentDocument.close();
+}
+
+function downloadInteractive() {
+  const html = buildInteractiveHTML(true);
+  const proyecto = document.getElementById('f-proyecto').value || 'cotizacion';
+  const slug = proyecto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]/g,'-').replace(/-+/g,'-').toLowerCase();
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `index.html`;
+  a.click();
+  toast(`✅ Descargado — súbelo a GitHub en la carpeta: COT-XXX-${slug}`);
+}
+
+// ===== SAVE / HISTORY =====
+function saveQuote() {
+  const proyecto = document.getElementById('f-proyecto').value || 'Sin nombre';
+  const fecha = document.getElementById('f-fecha').value;
+  const anticipo = document.getElementById('f-anticipo').value;
+  let total = 0;
+  items.forEach(it => { if (it.type !== 'section') total += (it.qty||0) * (it.price||0); });
+
+  const quote = {
+    id: Date.now(),
+    proyecto, fecha, anticipo, total,
+    mode: quoteMode,
+    items: JSON.parse(JSON.stringify(items)),
+    descripcion: document.getElementById('f-descripcion').value,
+    elaborado: document.getElementById('f-elaborado').value,
+    vigencia: document.getElementById('f-vigencia').value,
+    garantiaEq: document.getElementById('f-garantia-eq').value,
+    garantiaInst: document.getElementById('f-garantia-inst').value,
+    tiempoInst: document.getElementById('f-tiempo-inst').value,
+    disclaimer: document.getElementById('f-disclaimer').value,
+  };
+
+  quoteHistory.unshift(quote);
+  localStorage.setItem('jns_quotes', JSON.stringify(quoteHistory));
+  updateHistoryCount();
+  toast('💾 Cotización guardada correctamente');
+}
+
+function loadQuote(id) {
+  const q = quoteHistory.find(x => x.id === id);
+  if (!q) return;
+  document.getElementById('f-proyecto').value = q.proyecto || '';
+  document.getElementById('f-fecha').value = q.fecha || '';
+  document.getElementById('f-anticipo').value = q.anticipo || '65';
+  document.getElementById('f-descripcion').value = q.descripcion || '';
+  document.getElementById('f-elaborado').value = q.elaborado || '';
+  document.getElementById('f-vigencia').value = q.vigencia || '20';
+  document.getElementById('f-garantia-eq').value = q.garantiaEq || '';
+  document.getElementById('f-garantia-inst').value = q.garantiaInst || '';
+  document.getElementById('f-tiempo-inst').value = q.tiempoInst || '';
+  document.getElementById('f-disclaimer').value = q.disclaimer || '';
+  items = q.items || [];
+  quoteMode = q.mode || 'standard';
+  setMode(quoteMode);
+  renderItems();
+  updateHeader();
+  showView('form');
+  toast('📂 Cotización cargada');
+}
+
+function deleteQuote(id) {
+  quoteHistory = quoteHistory.filter(x => x.id !== id);
+  localStorage.setItem('jns_quotes', JSON.stringify(quoteHistory));
+  updateHistoryCount();
+  renderHistory();
+  toast('🗑️ Cotización eliminada');
+}
+
+function clearHistory() {
+  if (!confirm('¿Borrar todas las cotizaciones guardadas?')) return;
+  quoteHistory = [];
+  localStorage.setItem('jns_quotes', JSON.stringify(quoteHistory));
+  updateHistoryCount();
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (quoteHistory.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">📁</div><div class="es-title">No hay cotizaciones guardadas</div><p>Crea y guarda tu primera cotización para verla aquí.</p></div>`;
+    return;
+  }
+  let html = `<table class="history-table"><thead><tr><th>Proyecto</th><th>Fecha</th><th>Total</th><th>Anticipo</th><th>Acciones</th></tr></thead><tbody>`;
+  quoteHistory.forEach(q => {
+    html += `<tr>
+      <td><strong>${esc(q.proyecto)}</strong></td>
+      <td>${q.fecha || '—'}</td>
+      <td>${fmt(q.total)}</td>
+      <td>${q.anticipo}%</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-secondary btn-xs" onclick="loadQuote(${q.id})">📂 Cargar</button>
+        <button class="btn btn-gold btn-xs" onclick="loadQuote(${q.id});setTimeout(()=>generatePreview(),100)">👁️ PDF</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteQuote(${q.id})">✕</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function updateHistoryCount() {
+  document.getElementById('history-count').textContent = quoteHistory.length;
+}
+
+// ===== UTILS =====
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString('es-CO');
+}
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function resetForm() {
+  if (!confirm('¿Limpiar el formulario? Se perderán los cambios no guardados.')) return;
+  document.getElementById('f-proyecto').value = '';
+  document.getElementById('f-descripcion').value = '';
+  document.getElementById('f-disclaimer').value = '';
+  document.getElementById('f-vigencia').value = '20';
+  document.getElementById('f-anticipo').value = '65';
+  document.getElementById('f-elaborado').value = 'S. Toro Velasco & C. Lizarazo';
+  document.getElementById('f-garantia-eq').value = '1 año desde entrega';
+  document.getElementById('f-garantia-inst').value = '6 meses desde entrega';
+  document.getElementById('f-tiempo-inst').value = '15 días hábiles';
+  const today = new Date();
+  document.getElementById('f-fecha').value = today.toISOString().split('T')[0];
+  items = [];
+  renderItems();
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  updateHeader();
+}
+function updateHeader() {
+  const p = document.getElementById('f-proyecto').value;
+  document.getElementById('header-subtitle').textContent = p ? `Proyecto: ${p}` : 'Complete los datos para generar la cotización';
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
