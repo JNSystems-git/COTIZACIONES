@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SRGuard — Seguridad electrónica profesional en Cali y Valle del Cauca. CCTV, videoportería IP, control de acceso y barreras vehiculares para conjuntos residenciales.">
-<title>SRGuard · Seguridad Electrónica Profesional · Cali</title>
+<meta name="description" content="GATEPRO SR — Seguridad electrónica profesional en Cali y Valle del Cauca. CCTV, videoportería IP, control de acceso y barreras vehiculares para conjuntos residenciales.">
+<title>GATEPRO SR · Seguridad Electrónica Profesional · Cali</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
@@ -1057,7 +1057,7 @@ footer {
 
 <!-- NAV -->
 <nav id="navbar">
-  <a href="#" class="nav-logo">SR<span>Guard</span></a>
+  <a href="#" class="nav-logo">GATEPRO<span>SR</span></a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#nosotros">Nosotros</a></li>
@@ -1234,7 +1234,7 @@ footer {
 <section id="nosotros">
   <div class="why-inner">
     <div class="why-left reveal">
-      <p class="section-eyebrow">¿Por qué SRGuard?</p>
+      <p class="section-eyebrow">¿Por qué GATEPRO?</p>
       <h2 class="section-title">Técnicos, no intermediarios</h2>
       <p class="section-sub" style="margin-bottom: 1.5rem">Somos Sebastián y Ricardo, técnicos especializados en seguridad electrónica. Instalamos nosotros mismos cada sistema — sin sorpresas.</p>
       <a href="https://wa.me/573004060143?text=Hola%2C%20quiero%20hablar%20con%20ustedes" class="btn-primary" style="margin-top:.5rem">
@@ -1428,8 +1428,8 @@ footer {
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">SR<span>Guard</span></div>
-  <div class="footer-center">© 2025 SRGuard · Seguridad Electrónica · Cali, Colombia</div>
+  <div class="footer-logo">GATE<span>PRO</span></div>
+  <div class="footer-center">© 2025 GATEPRO SR · Seguridad Electrónica · Cali, Colombia</div>
   <div class="footer-right">
     <a href="#servicios">Servicios</a>
     <a href="#proceso">Proceso</a>
@@ -1576,7 +1576,7 @@ footer {
 </style>
 
 <!-- Botón flotante del chat -->
-<button class="srg-chat-btn" id="srgChatBtn" aria-label="Chat con SRGuard">
+<button class="srg-chat-btn" id="srgChatBtn" aria-label="Chat con GATEPRO SR">
   <div class="srg-notif" id="srgNotif">1</div>
   <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -1588,7 +1588,7 @@ footer {
   <div class="srg-chat-header">
     <div class="srg-chat-avatar">🛡️</div>
     <div>
-      <div class="srg-chat-hname">Asistente SRGuard</div>
+      <div class="srg-chat-hname">Asistente GATEPRO SR</div>
       <div class="srg-chat-hstatus">En línea ahora</div>
     </div>
     <button class="srg-chat-close" id="srgChatClose">✕</button>
@@ -1611,7 +1611,7 @@ footer {
   const CLAUDE_KEY = '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';
   const WA_NUMBER  = '573004060143';
 
-  const SYSTEM_PROMPT = `Eres el asistente virtual de SRGuard, empresa de seguridad electrónica en Cali, Colombia (también conocida como JNSystems). Eres amigable, directo y profesional.
+  const SYSTEM_PROMPT = `Eres el asistente virtual de GATEPRO SR, empresa de seguridad electrónica en Cali, Colombia (también conocida como JNSystems). Eres amigable, directo y profesional.
 
 SERVICIOS:
 - CCTV y videovigilancia (cámaras análogas e IP, DVR/NVR, almacenamiento)
@@ -1630,7 +1630,7 @@ INSTRUCCIONES:
 4. No inventes precios exactos — di que la cotización depende del proyecto y que la hacen gratis.
 5. Nunca digas que eres Claude ni menciones Anthropic.
 6. Si detectas intención de cotizar, responde con el texto EXACTO: [MOSTRAR_FORMULARIO]
-7. Mantén un tono cercano, como si fuera el equipo de SRGuard respondiendo.`;
+7. Mantén un tono cercano, como si fuera el equipo de GATEPRO SR respondiendo.`;
 
   let historial = [];
   let panelAbierto = false;
@@ -1662,7 +1662,7 @@ INSTRUCCIONES:
 
   // Iniciar con mensaje de bienvenida
   function iniciarChat() {
-    agregarMensaje('bot', '¡Hola! 👋 Soy el asistente de SRGuard. ¿En qué puedo ayudarte hoy?');
+    agregarMensaje('bot', '¡Hola! 👋 Soy el asistente de GATEPRO SR. ¿En qué puedo ayudarte hoy?');
     mostrarQuickReplies([
       '¿Qué servicios ofrecen?',
       'Quiero una cotización',
@@ -1759,7 +1759,7 @@ INSTRUCCIONES:
 
       // Abrir WhatsApp con los datos prellenados
       const msg = encodeURIComponent(
-        `Hola SRGuard! Me contacté desde su página web.\n\n` +
+        `Hola GATEPRO! Me contacté desde su página web.\n\n` +
         `*Nombre:* ${nombre}\n` +
         `*Teléfono:* ${tel}\n` +
         `*Propiedad:* ${propiedad || 'No especificado'}\n` +
